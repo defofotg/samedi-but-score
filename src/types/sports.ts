@@ -19,10 +19,8 @@ export interface Goal {
 export interface Match {
   id: string;
   date: Date;
-  homeTeamName: string; // nouveau champ
-  awayTeamName: string; // nouveau champ
-  opponent: string; // laissée pour rétrocompatibilité UI si nécessaire
-  homeTeam: boolean;
+  teamOneName: string;
+  teamTwoName: string;
   lineup: string[];
   goals: Goal[];
   result?: string;
