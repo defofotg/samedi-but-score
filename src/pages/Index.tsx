@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,25 +7,22 @@ import MatchManager from '@/components/MatchManager';
 import PlayersList from '@/components/PlayersList';
 import TopScorers from '@/components/TopScorers';
 import { Match, Player } from '@/types/sports';
+import { useSportsStore } from "@/stores/useSportsStore";
 
 const Index = () => {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const {
+    players,
+    matches,
+    fetchPlayers,
+    fetchMatches,
+    setPlayers,
+    setMatches,
+  } = useSportsStore();
 
   useEffect(() => {
-    const savedMatches = localStorage.getItem('matches');
-    const savedPlayers = localStorage.getItem('players');
-    if (savedMatches) setMatches(JSON.parse(savedMatches));
-    if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
+    fetchPlayers();
+    fetchMatches();
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem('matches', JSON.stringify(matches));
-  }, [matches]);
-
-  useEffect(() => {
-    localStorage.setItem('players', JSON.stringify(players));
-  }, [players]);
 
   // Nouveau calcul
   const totalMatches = matches.length;
