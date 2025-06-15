@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -257,22 +256,53 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 {match.teamB}: <span className="text-green-600">{match.score.goalsTeamB}</span>
               </div>
 
-              {/* Goals */}
+              {/* Goals – buteurs alignés de chaque côté */}
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
                   <Target className="h-4 w-4" />
                   Buteurs
                 </h4>
-                <div className="space-y-2">
-                  {Object.entries(match.goals || {}).map(([team, goalsArr]) =>
-                    goalsArr.map((entry, idx) => (
-                      <div key={team + idx + entry.playerId} className="flex items-center gap-2 p-2 bg-green-50 rounded">
-                        <Badge variant="outline">{team}</Badge>
-                        <span>{entry.playerName}</span>
-                        <span>({entry.nbGoals} but{entry.nbGoals > 1 ? 's' : ''})</span>
-                      </div>
-                    ))
-                  )}
+                <div className="flex flex-row gap-6">
+                  {/* Buteurs équipe de gauche */}
+                  <div className="flex-1 flex flex-col items-start gap-2">
+                    {(match.goals[match.teamA]?.length > 0) ? (
+                      match.goals[match.teamA].map((entry, idx) => (
+                        <div
+                          key={entry.playerId + idx}
+                          className="p-2 rounded bg-green-50 w-fit text-left"
+                        >
+                          <span>{entry.playerName}</span>
+                          <span className="ml-1 text-gray-600">
+                            ({entry.nbGoals} but{entry.nbGoals > 1 ? 's' : ''})
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 italic">—</span>
+                    )}
+                  </div>
+                  {/* Buteurs équipe de droite */}
+                  <div className="flex-1 flex flex-col items-end gap-2">
+                    {(match.goals[match.teamB]?.length > 0) ? (
+                      match.goals[match.teamB].map((entry, idx) => (
+                        <div
+                          key={entry.playerId + idx}
+                          className="p-2 rounded bg-green-50 w-fit text-right"
+                        >
+                          <span>{entry.playerName}</span>
+                          <span className="ml-1 text-gray-600">
+                            ({entry.nbGoals} but{entry.nbGoals > 1 ? 's' : ''})
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 italic">—</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-row justify-between px-1 mt-1 text-xs text-gray-400">
+                  <span>{match.teamA}</span>
+                  <span>{match.teamB}</span>
                 </div>
               </div>
 
