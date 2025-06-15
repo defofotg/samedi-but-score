@@ -1,22 +1,14 @@
 
 import React from "react";
 import { Minus } from "lucide-react";
-import { GoalEntry } from "@/types/sports";
+import {GoalEntry, RemoveGoalCommand} from "@/types/sports";
 import { Button } from "@/components/ui/button";
+import {useSportsStore} from "@/stores/useSportsStore.ts";
 
 interface GoalEntryListProps {
   entries: GoalEntry[];
   team: string;
   matchId: string;
-  onRemoveGoal: ({
-    matchId,
-    team,
-    playerId,
-  }: {
-    matchId: string;
-    team: string;
-    playerId: string;
-  }) => void;
   align?: "left" | "right";
   disabled?: boolean;
 }
@@ -25,12 +17,13 @@ const GoalEntryList: React.FC<GoalEntryListProps> = ({
   entries,
   team,
   matchId,
-  onRemoveGoal,
   align = "left",
   disabled = false,
 }) => {
   // Aligner à gauche ou à droite selon align
   const alignClass = align === "right" ? "items-end text-right" : "items-start text-left";
+
+  const removeGoalFromMatch = useSportsStore((state) => state.removeGoalMatch);
 
   return (
     <div className={`flex-1 flex flex-col gap-2 ${alignClass}`}>
@@ -50,11 +43,10 @@ const GoalEntryList: React.FC<GoalEntryListProps> = ({
               className="text-red-500"
               title="Retirer un but"
               onClick={() =>
-                onRemoveGoal({
-                  matchId,
-                  team,
+                  removeGoalFromMatch(matchId,{
                   playerId: entry.playerId,
-                })
+                  team,
+                } as RemoveGoalCommand)
               }
             >
               <Minus className="w-4 h-4" />

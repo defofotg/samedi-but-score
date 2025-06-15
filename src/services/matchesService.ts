@@ -1,5 +1,5 @@
 
-import {AddGoalCommand, Match, MatchCreationCommand} from "@/types/sports";
+import {AddGoalCommand, Match, MatchCreationCommand, RemoveGoalCommand} from "@/types/sports";
 
 const BACK_URL = 'http://localhost:8080/api/';
 const MATCHES_ENDPOINT = BACK_URL + 'matches'; // Adapte selon ton backend
@@ -23,10 +23,20 @@ export async function addMatch(match: MatchCreationCommand): Promise<void> {
 
 export async function addGoalMatch(matchId: string, addGoal: AddGoalCommand): Promise<void> {
   console.log('Adding goal to match...');
-  const res = await fetch(`${MATCHES_ENDPOINT}/${matchId}/goals`, {
+  const res = await fetch(`${MATCHES_ENDPOINT}/${matchId}/goals/add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(addGoal),
+  });
+  return res.json();
+}
+
+export async function removeGoalMatch(matchId: string, removeGoal: RemoveGoalCommand): Promise<void> {
+  console.log('Removing goal to match...');
+  const res = await fetch(`${MATCHES_ENDPOINT}/${matchId}/goals/remove`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(removeGoal),
   });
   return res.json();
 }

@@ -1,11 +1,12 @@
 import { create } from "zustand";
-import {AddGoalCommand, Match, MatchCreationCommand, Player} from "@/types/sports";
+import {AddGoalCommand, Match, MatchCreationCommand, Player, RemoveGoalCommand} from "@/types/sports";
 import { getPlayers, addPlayer } from "@/services/playersService";
 import {
   getMatches as getMatchesApi,
   addMatch as addMatchApi,
   updateMatch as updateMatchApi,
   addGoalMatch as addGoalApi,
+  removeGoalMatch as removeGoalApi,
 } from "@/services/matchesService";
 
 interface SportsState {
@@ -16,6 +17,7 @@ interface SportsState {
   addPlayer: (player: Player) => Promise<void>;
   addMatch: (match: MatchCreationCommand) => Promise<void>;
   addGoalMatch: (match: string, goalCommand: AddGoalCommand) => Promise<void>;
+  removeGoalMatch: (match: string, goalCommand: RemoveGoalCommand) => Promise<void>;
   setPlayers: (players: Player[]) => void;
   setMatches: (matches: Match[]) => void;
 }
@@ -43,6 +45,11 @@ export const useSportsStore = create<SportsState>((set, get) => ({
   },
   addGoalMatch: async (match, goalCommand: AddGoalCommand) => {
     await addGoalApi(match, goalCommand);
+    const matches = await getMatchesApi();
+    set({ matches });
+  },
+  removeGoalMatch: async (match, goalCommand: RemoveGoalCommand) => {
+    await removeGoalApi(match, goalCommand);
     const matches = await getMatchesApi();
     set({ matches });
   },

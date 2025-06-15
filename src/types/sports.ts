@@ -44,3 +44,9 @@ export interface AddGoalCommand {
   nbGoals: number;
 }
 
+export interface RemoveGoalCommand {
+  playerId: string;
+  playerName: string;
+  team: string;
+}
+
