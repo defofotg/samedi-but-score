@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, Users, Calendar, Target } from 'lucide-react';
 import MatchManager from '@/components/MatchManager';
 import PlayersList from '@/components/PlayersList';
 import TopScorers from '@/components/TopScorers';
-import { Match, Player } from '@/types/sports';
 import { useSportsStore } from "@/stores/useSportsStore";
 
 const Index = () => {

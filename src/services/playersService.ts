@@ -1,19 +1,19 @@
 
 import { Player } from "@/types/sports";
 
-// Fake API with local data as fallback (replace with real fetches)
-const LS_KEY = "players";
+const API_URL = 'http://localhost:8080/api/players'; // Adapte selon ton backend
 
 // Simulates a call to a backend
 export async function getPlayers(): Promise<Player[]> {
-  const str = localStorage.getItem(LS_KEY);
-  return str ? JSON.parse(str) : [];
+  console.log('Fetching players...');
+  const res = await fetch(API_URL);
+  return res.json();
 }
 
 export async function addPlayer(player: Player): Promise<void> {
   const players = await getPlayers();
   players.push(player);
-  localStorage.setItem(LS_KEY, JSON.stringify(players));
+  //localStorage.setItem(LS_KEY, JSON.stringify(players));
 }
 
 // Future: add removePlayer, updatePlayer etc here

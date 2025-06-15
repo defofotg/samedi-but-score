@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Match, Player } from "@/types/sports";
-import { getPlayers, addPlayer, getMatches, addMatch, updateMatches } from "@/services/playersService";
+import { getPlayers, addPlayer } from "@/services/playersService";
 import { getMatches as getMatchesApi, addMatch as addMatchApi, updateMatch as updateMatchApi } from "@/services/matchesService";
 
 interface SportsState {
