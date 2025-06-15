@@ -56,7 +56,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     entries={match.goals[match.teamA] || []}
                     team={match.teamA}
                     matchId={match.id}
-                    onRemoveGoal={removeGoal}
                     align="left"
                     disabled={match.isCompleted}
                 />
@@ -64,7 +63,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     entries={match.goals[match.teamB] || []}
                     team={match.teamB}
                     matchId={match.id}
-                    onRemoveGoal={removeGoal}
                     align="right"
                     disabled={match.isCompleted}
                 />
