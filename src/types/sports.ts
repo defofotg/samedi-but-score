@@ -12,7 +12,7 @@ export interface Goal {
   id: string;
   playerId: string;
   playerName: string;
-  minute: number;
+  team: string; // Nom de l'équipe pour laquelle le but a été marqué
   matchId: string;
 }
 

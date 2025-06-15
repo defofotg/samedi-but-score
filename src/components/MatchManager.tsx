@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     teamTwoName: '',
   });
   const [newPlayer, setNewPlayer] = useState({ name: '', position: '' });
-  const [goalData, setGoalData] = useState({ playerId: '', minute: '' });
+  const [goalData, setGoalData] = useState({ playerId: '', team: '' });
 
   const createMatch = () => {
     if (!newMatch.date || !newMatch.teamOneName || !newMatch.teamTwoName) {
@@ -50,11 +49,9 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     toast.success('Match créé avec succès');
   };
 
-  // Suppression de la gestion de compositions
-
   const addGoal = (matchId: string) => {
-    if (!goalData.playerId || !goalData.minute) {
-      toast.error('Veuillez sélectionner un joueur et indiquer la minute');
+    if (!goalData.playerId || !goalData.team) {
+      toast.error('Veuillez sélectionner un joueur et une équipe');
       return;
     }
 
@@ -65,7 +62,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       id: Date.now().toString(),
       playerId: goalData.playerId,
       playerName: player.name,
-      minute: parseInt(goalData.minute),
+      team: goalData.team, // Nom de l'équipe
       matchId,
     };
 
@@ -86,7 +83,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
 
     setMatches(updatedMatches);
     setPlayers(updatedPlayers);
-    setGoalData({ playerId: '', minute: '' });
+    setGoalData({ playerId: '', team: '' });
     toast.success(`But marqué par ${player.name}!`);
   };
 
@@ -250,7 +247,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 <div className="space-y-2">
                   {match.goals.map((goal) => (
                     <div key={goal.id} className="flex items-center gap-2 p-2 bg-green-50 rounded">
-                      <Badge variant="outline">{goal.minute}'</Badge>
+                      <Badge variant="outline">{goal.team}</Badge>
                       <span>{goal.playerName}</span>
                     </div>
                   ))}
@@ -275,14 +272,17 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                       ))}
                     </select>
                   </div>
-                  <div className="w-24">
-                    <Label>Minute</Label>
-                    <Input
-                      type="number"
-                      placeholder="90"
-                      value={goalData.minute}
-                      onChange={(e) => setGoalData({...goalData, minute: e.target.value})}
-                    />
+                  <div className="flex-1">
+                    <Label>Équipe</Label>
+                    <select
+                      className="w-full p-2 border rounded"
+                      value={goalData.team}
+                      onChange={(e) => setGoalData({ ...goalData, team: e.target.value })}
+                    >
+                      <option value="">Sélectionner une équipe</option>
+                      <option value={match.teamOneName}>{match.teamOneName}</option>
+                      <option value={match.teamTwoName}>{match.teamTwoName}</option>
+                    </select>
                   </div>
                   <Button
                     onClick={() => addGoal(match.id)}
@@ -312,4 +312,3 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
 };
 
 export default MatchManager;
-
