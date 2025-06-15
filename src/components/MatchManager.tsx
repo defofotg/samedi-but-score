@@ -12,6 +12,7 @@ import MatchCardTitle from './MatchCardTitle';
 import GoalEntryList from './GoalEntryList';
 import AddPlayerForm from "./AddPlayerForm";
 import AddGoalForm from "./AddGoalForm";
+import { useSportsStore } from "@/stores/useSportsStore";
 
 interface MatchManagerProps {
   matches: Match[];
@@ -34,6 +35,9 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   });
   const [newPlayer, setNewPlayer] = useState({ name: '' });
 
+  // Importation de addMatch depuis le store
+  const addMatch = useSportsStore(state => state.addMatch);
+
   // Pour l'ajout de buteur
   const [goalData, setGoalData] = useState({ matchId: '', team: '', playerId: '', nbGoals: 1 });
 
@@ -47,7 +51,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     return `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`;
   }
 
-  const createMatch = () => {
+  const createMatch = async () => {
     if (!newMatch.date || !newMatch.teamA || !newMatch.teamB) {
       toast.error('Veuillez remplir tous les champs');
       return;
@@ -63,7 +67,8 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       isCompleted: false,
     };
 
-    setMatches([...matches, match]);
+    // Utilisation du store pour ajouter le match et déclencher la mise à jour des matchs via fetch
+    await addMatch(match);
     setNewMatch({ date: '', teamA: '', teamB: '' });
     setShowNewMatch(false);
     toast.success('Match créé avec succès');
