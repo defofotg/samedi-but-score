@@ -13,6 +13,8 @@ import GoalEntryList from './GoalEntryList';
 import AddPlayerForm from "./AddPlayerForm";
 import AddGoalForm from "./AddGoalForm";
 import { useSportsStore } from "@/stores/useSportsStore";
+import NewMatchDialog from "./NewMatchDialog";
+import MatchCard from "./MatchCard";
 
 interface MatchManagerProps {
   matches: Match[];
@@ -209,116 +211,21 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Gestion des matches</h2>
-        <Dialog open={showNewMatch} onOpenChange={setShowNewMatch}>
-          <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau match
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Créer un nouveau match</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Date du match</Label>
-                <Input
-                  type="date"
-                  value={newMatch.date}
-                  onChange={e => setNewMatch({ ...newMatch, date: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Nom de l’équipe A</Label>
-                <Input
-                  placeholder="Nom de l'équipe A"
-                  value={newMatch.teamA}
-                  onChange={e =>
-                    setNewMatch({ ...newMatch, teamA: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Nom de l’équipe B</Label>
-                <Input
-                  placeholder="Nom de l'équipe B"
-                  value={newMatch.teamB}
-                  onChange={e =>
-                    setNewMatch({ ...newMatch, teamB: e.target.value })
-                  }
-                />
-              </div>
-              <Button onClick={createMatch} className="w-full">
-                Créer le match
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <NewMatchDialog />
       </div>
 
-      {/* Add Player Section (refactored) */}
       <AddPlayerForm players={players} setPlayers={setPlayers} />
 
       {/* Matches List */}
       <div className="grid gap-6">
         {matches.map((match) => (
-          <Card key={match.id} className="overflow-hidden">
-            <CardHeader className={`${match.isCompleted ? 'bg-gray-50' : 'bg-green-50'} pb-0`} />
-            <CardContent className="p-6 pt-4">
-              <MatchCardTitle
-                teamA={match.teamA}
-                teamB={match.teamB}
-                scoreA={match.score.goalsTeamA}
-                scoreB={match.score.goalsTeamB}
-                isCompleted={match.isCompleted}
-              />
-              {/* Affichage de la date si besoin */}
-              <div className="text-xs text-muted-foreground mb-2 ml-1">
-                {typeof match.date === 'string' ? formatDateForDisplay(match.date) : ''}
-              </div>
-              {/* Buteurs avec suppression */}
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Buteurs
-                </h4>
-                <div className="flex flex-row gap-6">
-                  <GoalEntryList
-                    entries={match.goals[match.teamA] || []}
-                    team={match.teamA}
-                    matchId={match.id}
-                    onRemoveGoal={removeGoal}
-                    align="left"
-                    disabled={match.isCompleted}
-                  />
-                  <GoalEntryList
-                    entries={match.goals[match.teamB] || []}
-                    team={match.teamB}
-                    matchId={match.id}
-                    onRemoveGoal={removeGoal}
-                    align="right"
-                    disabled={match.isCompleted}
-                  />
-                </div>
-                <div className="flex flex-row justify-between px-1 mt-1 text-xs text-gray-400">
-                  <span>{match.teamA}</span>
-                  <span>{match.teamB}</span>
-                </div>
-              </div>
-
-              {/* Add Goal (refactored) */}
-              {!match.isCompleted && (
-                <AddGoalForm
-                  matchId={match.id}
-                  matchTeamA={match.teamA}
-                  matchTeamB={match.teamB}
-                  players={players}
-                  addGoal={addGoalToMatch}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <MatchCard
+            key={match.id}
+            match={match}
+            players={players}
+            addGoalToMatch={addGoalToMatch}
+            removeGoal={removeGoal}
+          />
         ))}
       </div>
 
