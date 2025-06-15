@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,8 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   const [showLineup, setShowLineup] = useState<string | null>(null);
   const [newMatch, setNewMatch] = useState({
     date: '',
-    opponent: '',
+    homeTeamName: '',
+    awayTeamName: '',
     homeTeam: true,
   });
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
@@ -30,7 +30,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   const [goalData, setGoalData] = useState({ playerId: '', minute: '' });
 
   const createMatch = () => {
-    if (!newMatch.date || !newMatch.opponent) {
+    if (!newMatch.date || !newMatch.homeTeamName || !newMatch.awayTeamName) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
@@ -38,7 +38,9 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     const match: Match = {
       id: Date.now().toString(),
       date: new Date(newMatch.date),
-      opponent: newMatch.opponent,
+      homeTeamName: newMatch.homeTeamName,
+      awayTeamName: newMatch.awayTeamName,
+      opponent: newMatch.homeTeam ? newMatch.awayTeamName : newMatch.homeTeamName, // pour rétrocompatibilité
       homeTeam: newMatch.homeTeam,
       lineup: [],
       goals: [],
@@ -47,7 +49,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     };
 
     setMatches([...matches, match]);
-    setNewMatch({ date: '', opponent: '', homeTeam: true });
+    setNewMatch({ date: '', homeTeamName: '', awayTeamName: '', homeTeam: true });
     setShowNewMatch(false);
     toast.success('Match créé avec succès');
   };
@@ -163,15 +165,23 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 <Input
                   type="datetime-local"
                   value={newMatch.date}
-                  onChange={(e) => setNewMatch({...newMatch, date: e.target.value})}
+                  onChange={(e) => setNewMatch({ ...newMatch, date: e.target.value })}
                 />
               </div>
               <div>
-                <Label>Adversaire</Label>
+                <Label>Nom de l’équipe à domicile</Label>
                 <Input
-                  placeholder="Nom de l'équipe adverse"
-                  value={newMatch.opponent}
-                  onChange={(e) => setNewMatch({...newMatch, opponent: e.target.value})}
+                  placeholder="Nom du club à domicile"
+                  value={newMatch.homeTeamName}
+                  onChange={(e) => setNewMatch({ ...newMatch, homeTeamName: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Nom de l’équipe extérieure</Label>
+                <Input
+                  placeholder="Nom du club visiteur"
+                  value={newMatch.awayTeamName}
+                  onChange={(e) => setNewMatch({ ...newMatch, awayTeamName: e.target.value })}
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -179,9 +189,9 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                   type="checkbox"
                   id="homeTeam"
                   checked={newMatch.homeTeam}
-                  onChange={(e) => setNewMatch({...newMatch, homeTeam: e.target.checked})}
+                  onChange={(e) => setNewMatch({ ...newMatch, homeTeam: e.target.checked })}
                 />
-                <Label htmlFor="homeTeam">Match à domicile</Label>
+                <Label htmlFor="homeTeam">Mon équipe joue à domicile</Label>
               </div>
               <Button onClick={createMatch} className="w-full">
                 Créer le match
@@ -233,7 +243,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    vs {match.opponent}
+                    {match.homeTeamName} <span className="mx-1 text-gray-500">vs</span> {match.awayTeamName}
                     {match.homeTeam && <Badge variant="secondary">Domicile</Badge>}
                     {match.completed && <Badge className="bg-green-600">Terminé</Badge>}
                   </CardTitle>
