@@ -38,88 +38,36 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   // Importation de addMatch depuis le store
   const addMatch = useSportsStore(state => state.addMatch);
 
-  // Nouvelle : transformation d'un payload façon API vers Match du store
-  function mapPayloadToMatch(payload: {
-    date: string;
-    teamA: string;
-    teamB: string;
-    scoreA: number;
-    scoreB: number;
-    goals: { playerId: string; team: string }[];
-  }): Match {
-    // Structure goals attendue: { [team]: GoalEntry[] }, GoalEntry ayant nbGoals cumulés
-    const goals: { [team: string]: GoalEntry[] } = {};
-    const goalCount: { [team: string]: { [playerId: string]: GoalEntry } } = {};
+  // Pour l'ajout de buteur
+  const [goalData, setGoalData] = useState({ matchId: '', team: '', playerId: '', nbGoals: 1 });
 
-    payload.goals.forEach(g => {
-      // Cherche les infos du joueur
-      const player = players.find(p => p.id === g.playerId);
-      if (!player) return;
-      if (!goalCount[g.team]) goalCount[g.team] = {};
-      if (!goalCount[g.team][g.playerId]) {
-        goalCount[g.team][g.playerId] = {
-          playerId: g.playerId,
-          playerName: player.name,
-          team: g.team,
-          nbGoals: 1,
-        };
-      } else {
-        goalCount[g.team][g.playerId].nbGoals += 1;
-      }
-    });
-    // Construit la structure goals
-    Object.entries(goalCount).forEach(([team, entries]) => {
-      goals[team] = Object.values(entries);
-    });
-
-    // Conversion date string vers [yyyy, m, d]
-    const [year, month, day] = payload.date.split('-').map(Number);
-
-    return {
-      id: Date.now().toString(),
-      date: [year, month, day],
-      teamA: payload.teamA,
-      teamB: payload.teamB,
-      score: { goalsTeamA: payload.scoreA, goalsTeamB: payload.scoreB },
-      goals,
-      isCompleted: false,
-    };
+  function parseDateStringToArray(str: string): [number, number, number] {
+    // "2025-06-19" => [2025,6,19]
+    const [year, month, day] = str.split('-').map(Number);
+    return [year, month, day];
+  }
+  function dateArrayToString(arr: [number, number, number]): string {
+    const [y, m, d] = arr;
+    return `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`;
   }
 
-  // Adapter createMatch pour utiliser ce mapping si donnée type payload API
-  const createMatch = async (customPayload?: {
-    date: string;
-    teamA: string;
-    teamB: string;
-    scoreA: number;
-    scoreB: number;
-    goals: { playerId: string; team: string }[];
-  }) => {
-    let match: Match;
-    if (customPayload) {
-      try {
-        match = mapPayloadToMatch(customPayload);
-      } catch (e) {
-        toast.error("Erreur mappage du match.");
-        return;
-      }
-    } else {
-      // Ancien comportement du formulaire habituel
-      if (!newMatch.date || !newMatch.teamA || !newMatch.teamB) {
-        toast.error('Veuillez remplir tous les champs');
-        return;
-      }
-      match = {
-        id: Date.now().toString(),
-        date: parseDateStringToArray(newMatch.date),
-        teamA: newMatch.teamA,
-        teamB: newMatch.teamB,
-        score: { goalsTeamA: 0, goalsTeamB: 0 },
-        goals: {},
-        isCompleted: false,
-      };
+  const createMatch = async () => {
+    if (!newMatch.date || !newMatch.teamA || !newMatch.teamB) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
     }
 
+    const match: Match = {
+      id: Date.now().toString(),
+      date: parseDateStringToArray(newMatch.date),
+      teamA: newMatch.teamA,
+      teamB: newMatch.teamB,
+      score: { goalsTeamA: 0, goalsTeamB: 0 },
+      goals: {},
+      isCompleted: false,
+    };
+
+    // Utilisation du store pour ajouter le match et déclencher la mise à jour des matchs via fetch
     await addMatch(match);
     setNewMatch({ date: '', teamA: '', teamB: '' });
     setShowNewMatch(false);
