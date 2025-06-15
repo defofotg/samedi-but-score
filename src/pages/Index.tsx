@@ -172,6 +172,7 @@ const Index = () => {
               setMatches={setMatches}
               players={players}
               setPlayers={setPlayers}
+              isAuthenticated={isAuthenticated}
             />
           </TabsContent>
 

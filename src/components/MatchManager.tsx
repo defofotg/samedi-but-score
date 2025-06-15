@@ -13,9 +13,12 @@ interface MatchManagerProps {
   setMatches: (matches: Match[]) => void;
   players: Player[];
   setPlayers: (players: Player[]) => void;
+  isAuthenticated: boolean; // Ajout
 }
 
-const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManagerProps) => {
+const MatchManager = ({
+  matches, setMatches, players, setPlayers, isAuthenticated // Ajout
+}: MatchManagerProps) => {
   const [showNewMatch, setShowNewMatch] = useState(false);
   const [newMatch, setNewMatch] = useState({
     date: new Date(),
@@ -179,11 +182,13 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Gestion des matches</h2>
-        <NewMatchDialog />
+        {/* Le bouton "Nouveau match" est désactivé si non connecté */}
+        <div className={!isAuthenticated ? "opacity-50 pointer-events-none" : ""}>
+          <NewMatchDialog />
+        </div>
       </div>
-
-      <AddPlayerForm players={players} setPlayers={setPlayers} />
-
+      {/* Formulaire ajout joueur, désactivé si non connecté */}
+      <AddPlayerForm players={players} setPlayers={setPlayers} isAuthenticated={isAuthenticated} />
       {/* Matches List */}
       <div className="grid gap-6">
         {matches.map((match) => (
@@ -193,10 +198,10 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
             players={players}
             addGoalToMatch={addGoalToMatch}
             removeGoal={removeGoal}
+            isAuthenticated={isAuthenticated}
           />
         ))}
       </div>
-
       {matches.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import MatchCardTitle from "./MatchCardTitle";
 import GoalEntryList from "./GoalEntryList";
@@ -19,6 +18,7 @@ interface MatchCardProps {
   removeGoal: ({
     matchId, team, playerId,
   }: { matchId: string; team: string; playerId: string; }) => void;
+  isAuthenticated: boolean;
 }
 
 function formatDateForDisplay(dateStr: string): string {
@@ -32,6 +32,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   players,
   addGoalToMatch,
   removeGoal,
+  isAuthenticated
 }) => {
   return (
     <Card className="overflow-hidden">
@@ -53,31 +54,34 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </h4>
               <div className="flex flex-row gap-6">
                 <GoalEntryList
-                    entries={match.goals[match.teamA] || []}
-                    team={match.teamA}
-                    matchId={match.id}
-                    align="left"
-                    disabled={match.isCompleted}
+                  entries={match.goals[match.teamA] || []}
+                  team={match.teamA}
+                  matchId={match.id}
+                  align="left"
+                  disabled={match.isCompleted || !isAuthenticated}
                 />
                 <GoalEntryList
-                    entries={match.goals[match.teamB] || []}
-                    team={match.teamB}
-                    matchId={match.id}
-                    align="right"
-                    disabled={match.isCompleted}
+                  entries={match.goals[match.teamB] || []}
+                  team={match.teamB}
+                  matchId={match.id}
+                  align="right"
+                  disabled={match.isCompleted || !isAuthenticated}
                 />
               </div>
             </div>
         )}
-
         {/* Ajout but */}
         {!match.isCompleted && (
-            <AddGoalForm
-                matchId={match.id}
-                matchTeamA={match.teamA}
-                matchTeamB={match.teamB}
-                players={players}
-            />
+          <AddGoalForm
+            matchId={match.id}
+            matchTeamA={match.teamA}
+            matchTeamB={match.teamB}
+            players={players}
+            disabled={!isAuthenticated}
+          />
+        )}
+        {!isAuthenticated && (
+          <p className="text-xs text-gray-400 mt-2">Connectez-vous pour gérer les buts.</p>
         )}
       </CardContent>
     </Card>
