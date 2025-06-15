@@ -19,13 +19,11 @@ interface MatchManagerProps {
 
 const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManagerProps) => {
   const [showNewMatch, setShowNewMatch] = useState(false);
-  const [showLineup, setShowLineup] = useState<string | null>(null);
   const [newMatch, setNewMatch] = useState({
     date: '',
     teamOneName: '',
     teamTwoName: '',
   });
-  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [newPlayer, setNewPlayer] = useState({ name: '', position: '' });
   const [goalData, setGoalData] = useState({ playerId: '', minute: '' });
 
@@ -52,25 +50,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     toast.success('Match créé avec succès');
   };
 
-  const addPlayerToLineup = (matchId: string, playerId: string) => {
-    const updatedMatches = matches.map(match => {
-      if (match.id === matchId && match.lineup.length < 11) {
-        return { ...match, lineup: [...match.lineup, playerId] };
-      }
-      return match;
-    });
-    setMatches(updatedMatches);
-  };
-
-  const removePlayerFromLineup = (matchId: string, playerId: string) => {
-    const updatedMatches = matches.map(match => {
-      if (match.id === matchId) {
-        return { ...match, lineup: match.lineup.filter(id => id !== playerId) };
-      }
-      return match;
-    });
-    setMatches(updatedMatches);
-  };
+  // Suppression de la gestion de compositions
 
   const addGoal = (matchId: string) => {
     if (!goalData.playerId || !goalData.minute) {
@@ -247,62 +227,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Users className="h-4 w-4 mr-1" />
-                        Composition ({match.lineup.length}/11)
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Composition d'équipe</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <h4 className="font-semibold mb-2">Joueurs sélectionnés</h4>
-                            <div className="space-y-2 max-h-64 overflow-y-auto">
-                              {match.lineup.map((playerId) => {
-                                const player = players.find(p => p.id === playerId);
-                                return player ? (
-                                  <div key={playerId} className="flex justify-between items-center p-2 bg-green-50 rounded">
-                                    <span>{player.name} - {player.position}</span>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => removePlayerFromLineup(match.id, playerId)}
-                                    >
-                                      Retirer
-                                    </Button>
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-2">Joueurs disponibles</h4>
-                            <div className="space-y-2 max-h-64 overflow-y-auto">
-                              {players
-                                .filter(player => !match.lineup.includes(player.id))
-                                .map((player) => (
-                                  <div key={player.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                    <span>{player.name} - {player.position}</span>
-                                    <Button
-                                      size="sm"
-                                      disabled={match.lineup.length >= 11}
-                                      onClick={() => addPlayerToLineup(match.id, player.id)}
-                                    >
-                                      Ajouter
-                                    </Button>
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  {/* Suppression du bouton de composition */}
                   {!match.completed && (
                     <Button
                       onClick={() => completeMatch(match.id)}
@@ -343,14 +268,11 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                       onChange={(e) => setGoalData({...goalData, playerId: e.target.value})}
                     >
                       <option value="">Sélectionner un joueur</option>
-                      {match.lineup.map((playerId) => {
-                        const player = players.find(p => p.id === playerId);
-                        return player ? (
-                          <option key={playerId} value={playerId}>
-                            {player.name}
-                          </option>
-                        ) : null;
-                      })}
+                      {players.map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="w-24">
@@ -390,3 +312,4 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
 };
 
 export default MatchManager;
+
