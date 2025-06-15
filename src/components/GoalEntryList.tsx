@@ -41,7 +41,7 @@ const GoalEntryList: React.FC<GoalEntryListProps> = ({
         >
           <span>{entry.playerName}</span>
           <span className="ml-1 text-gray-600">
-            ({entry.nbGoals} but{entry.nbGoals > 1 ? "s" : ""})
+            {entry.nbGoals > 1 && `(x${entry.nbGoals})`}
           </span>
           {!disabled && entry.nbGoals > 0 && (
             <Button

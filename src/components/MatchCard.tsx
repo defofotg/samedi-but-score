@@ -23,7 +23,7 @@ interface MatchCardProps {
 
 function formatDateForDisplay(dateStr: string): string {
   if (!dateStr) return '';
-  const [year, month, day] = dateStr.split('-');
+  const [year, month, day] = dateStr.split(',');
   return `${day}/${month}/${year}`;
 }
 
@@ -43,50 +43,43 @@ const MatchCard: React.FC<MatchCardProps> = ({
           scoreA={match.score.goalsTeamA}
           scoreB={match.score.goalsTeamB}
           isCompleted={match.isCompleted}
+          matchDate={formatDateForDisplay(match.date.toString())}
         />
-        <div className="text-xs text-muted-foreground mb-2 ml-1">
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="inline w-3 h-3" />
-            {typeof match.date === "string" ? formatDateForDisplay(match.date) : ""}
-          </span>
-        </div>
         {/* Buteurs */}
-        <div className="mb-4">
-          <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <Target className="h-4 w-4" /> Buteurs
-          </h4>
-          <div className="flex flex-row gap-6">
-            <GoalEntryList
-              entries={match.goals[match.teamA] || []}
-              team={match.teamA}
-              matchId={match.id}
-              onRemoveGoal={removeGoal}
-              align="left"
-              disabled={match.isCompleted}
-            />
-            <GoalEntryList
-              entries={match.goals[match.teamB] || []}
-              team={match.teamB}
-              matchId={match.id}
-              onRemoveGoal={removeGoal}
-              align="right"
-              disabled={match.isCompleted}
-            />
-          </div>
-          <div className="flex flex-row justify-between px-1 mt-1 text-xs text-gray-400">
-            <span>{match.teamA}</span>
-            <span>{match.teamB}</span>
-          </div>
-        </div>
+        { match.score.goalsTeamA + match.score.goalsTeamB > 0 && (
+            <div className="mb-4">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Target className="h-4 w-4"/> Buteurs
+              </h4>
+              <div className="flex flex-row gap-6">
+                <GoalEntryList
+                    entries={match.goals[match.teamA] || []}
+                    team={match.teamA}
+                    matchId={match.id}
+                    onRemoveGoal={removeGoal}
+                    align="left"
+                    disabled={match.isCompleted}
+                />
+                <GoalEntryList
+                    entries={match.goals[match.teamB] || []}
+                    team={match.teamB}
+                    matchId={match.id}
+                    onRemoveGoal={removeGoal}
+                    align="right"
+                    disabled={match.isCompleted}
+                />
+              </div>
+            </div>
+        )}
+
         {/* Ajout but */}
         {!match.isCompleted && (
-          <AddGoalForm
-            matchId={match.id}
-            matchTeamA={match.teamA}
-            matchTeamB={match.teamB}
-            players={players}
-            addGoal={addGoalToMatch}
-          />
+            <AddGoalForm
+                matchId={match.id}
+                matchTeamA={match.teamA}
+                matchTeamB={match.teamB}
+                players={players}
+            />
         )}
       </CardContent>
     </Card>

@@ -1,17 +1,9 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Users, Target } from 'lucide-react';
-import { Match, Player, GoalEntry } from '@/types/sports';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar } from 'lucide-react';
+import { Match, Player } from '@/types/sports';
 import { toast } from 'sonner';
-import MatchCardTitle from './MatchCardTitle';
-import GoalEntryList from './GoalEntryList';
 import AddPlayerForm from "./AddPlayerForm";
-import AddGoalForm from "./AddGoalForm";
 import { useSportsStore } from "@/stores/useSportsStore";
 import NewMatchDialog from "./NewMatchDialog";
 import MatchCard from "./MatchCard";
@@ -23,15 +15,10 @@ interface MatchManagerProps {
   setPlayers: (players: Player[]) => void;
 }
 
-function getTodayDateArray(): [number, number, number] {
-  const d = new Date();
-  return [d.getFullYear(), d.getMonth() + 1, d.getDate()];
-}
-
 const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManagerProps) => {
   const [showNewMatch, setShowNewMatch] = useState(false);
   const [newMatch, setNewMatch] = useState({
-    date: '',       // format attendu yyyy-MM-dd
+    date: new Date(),
     teamA: '',
     teamB: '',
   });
@@ -43,16 +30,6 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   // Pour l'ajout de buteur
   const [goalData, setGoalData] = useState({ matchId: '', team: '', playerId: '', nbGoals: 1 });
 
-  function parseDateStringToArray(str: string): [number, number, number] {
-    // "2025-06-19" => [2025,6,19]
-    const [year, month, day] = str.split('-').map(Number);
-    return [year, month, day];
-  }
-  function dateArrayToString(arr: [number, number, number]): string {
-    const [y, m, d] = arr;
-    return `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`;
-  }
-
   const createMatch = async () => {
     if (!newMatch.date || !newMatch.teamA || !newMatch.teamB) {
       toast.error('Veuillez remplir tous les champs');
@@ -60,7 +37,6 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     }
 
     const match: Match = {
-      id: Date.now().toString(),
       date: newMatch.date, // format yyyy-MM-dd
       teamA: newMatch.teamA,
       teamB: newMatch.teamB,
@@ -71,7 +47,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
 
     // Utilisation du store pour ajouter le match et déclencher la mise à jour des matchs via fetch
     await addMatch(match);
-    setNewMatch({ date: '', teamA: '', teamB: '' });
+    setNewMatch({ date: new Date(), teamA: '', teamB: '' });
     setShowNewMatch(false);
     toast.success('Match créé avec succès');
   };
@@ -197,14 +173,6 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       toast.success(`But retiré à ${player.name}`);
     }
   };
-
-  // Pour l'affichage, on affiche la date au format français par exemple :
-  // soit "14/06/2025" à partir de "2025-06-14"
-  function formatDateForDisplay(dateStr: string): string {
-    if (!dateStr) return '';
-    const [year, month, day] = dateStr.split('-');
-    return `${day}/${month}/${year}`;
-  }
 
   return (
     <div className="space-y-6">

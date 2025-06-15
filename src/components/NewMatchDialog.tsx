@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useSportsStore } from "@/stores/useSportsStore";
-import { Match } from "@/types/sports";
+import {MatchCreationCommand} from "@/types/sports";
 
 interface NewMatchDialogProps {}
 
@@ -25,13 +25,10 @@ const NewMatchDialog: React.FC<NewMatchDialogProps> = () => {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-    const match: Match = {
-      id: Date.now().toString(),
-      date: form.date,
+    const match: MatchCreationCommand = {
+      date: new Date(form.date),
       teamA: form.teamA,
       teamB: form.teamB,
-      score: { goalsTeamA: 0, goalsTeamB: 0 },
-      goals: {},
       isCompleted: false,
     };
     await addMatch(match);

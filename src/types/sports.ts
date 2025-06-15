@@ -2,7 +2,7 @@
 export interface GoalEntry {
   playerId: string;
   playerName: string;
-  team: string; // Nom de l'équipe pour laquelle le but a été marqué
+  team: string;
   nbGoals: number;
 }
 
@@ -16,8 +16,8 @@ export type GoalsByTeam = {
 };
 
 export interface Match {
-  id: string;
-  date: [number, number, number]; // [yyyy, m, d]
+  id?: string;
+  date: Date;
   teamA: string;
   teamB: string;
   score: MatchScore;
@@ -29,3 +29,18 @@ export interface Player {
   id: string;
   name: string;
 }
+
+export interface MatchCreationCommand {
+  date: Date;
+  teamA: string;
+  teamB: string;
+  isCompleted: boolean;
+}
+
+export interface AddGoalCommand {
+  playerId: string;
+  playerName: string;
+  team: string;
+  nbGoals: number;
+}
+
