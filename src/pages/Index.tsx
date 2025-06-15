@@ -6,6 +6,10 @@ import MatchManager from '@/components/MatchManager';
 import PlayersList from '@/components/PlayersList';
 import TopScorers from '@/components/TopScorers';
 import { useSportsStore } from "@/stores/useSportsStore";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const {
@@ -16,6 +20,9 @@ const Index = () => {
     setPlayers,
     setMatches,
   } = useSportsStore();
+
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading } = useAuthUser();
 
   useEffect(() => {
     fetchPlayers();
@@ -38,6 +45,35 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      {/* Barre d’accès authentification */}
+      <div className="flex justify-end items-center bg-white px-4 py-2 border-b">
+        {!loading && !isAuthenticated ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            onClick={() => navigate("/auth")}
+          >
+            Se connecter
+          </Button>
+        ) : null}
+        {!loading && isAuthenticated ? (
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm text-gray-700">Bonjour, {user?.email}</span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate("/auth");
+              }}
+            >
+              Déconnexion
+            </Button>
+          </div>
+        ) : null}
+      </div>
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-6">
