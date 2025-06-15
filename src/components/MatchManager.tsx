@@ -29,7 +29,7 @@ function getTodayDateArray(): [number, number, number] {
 const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManagerProps) => {
   const [showNewMatch, setShowNewMatch] = useState(false);
   const [newMatch, setNewMatch] = useState({
-    date: '',
+    date: '',       // format attendu yyyy-MM-dd
     teamA: '',
     teamB: '',
   });
@@ -59,7 +59,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
 
     const match: Match = {
       id: Date.now().toString(),
-      date: parseDateStringToArray(newMatch.date),
+      date: newMatch.date, // format yyyy-MM-dd
       teamA: newMatch.teamA,
       teamB: newMatch.teamB,
       score: { goalsTeamA: 0, goalsTeamB: 0 },
@@ -196,6 +196,14 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     }
   };
 
+  // Pour l'affichage, on affiche la date au format français par exemple :
+  // soit "14/06/2025" à partir de "2025-06-14"
+  function formatDateForDisplay(dateStr: string): string {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -265,7 +273,10 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 scoreB={match.score.goalsTeamB}
                 isCompleted={match.isCompleted}
               />
-
+              {/* Affichage de la date si besoin */}
+              <div className="text-xs text-muted-foreground mb-2 ml-1">
+                {typeof match.date === 'string' ? formatDateForDisplay(match.date) : ''}
+              </div>
               {/* Buteurs avec suppression */}
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
