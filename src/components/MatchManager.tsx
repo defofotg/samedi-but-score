@@ -23,7 +23,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     teamOneName: '',
     teamTwoName: '',
   });
-  const [newPlayer, setNewPlayer] = useState({ name: '', position: '' });
+  const [newPlayer, setNewPlayer] = useState({ name: '' });
   const [goalData, setGoalData] = useState({ playerId: '', team: '' });
 
   const createMatch = () => {
@@ -99,7 +99,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
   };
 
   const addNewPlayer = () => {
-    if (!newPlayer.name || !newPlayer.position) {
+    if (!newPlayer.name) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
@@ -107,14 +107,13 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     const player: Player = {
       id: Date.now().toString(),
       name: newPlayer.name,
-      position: newPlayer.position,
       totalGoals: 0,
       matchesPlayed: 0,
       createdAt: new Date(),
     };
 
     setPlayers([...players, player]);
-    setNewPlayer({ name: '', position: '' });
+    setNewPlayer({ name: '' });
     toast.success('Joueur ajouté avec succès');
   };
 
@@ -182,15 +181,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
               <Input
                 placeholder="Nom du joueur"
                 value={newPlayer.name}
-                onChange={(e) => setNewPlayer({...newPlayer, name: e.target.value})}
-              />
-            </div>
-            <div className="flex-1">
-              <Label>Poste</Label>
-              <Input
-                placeholder="Gardien, Défenseur, Milieu, Attaquant"
-                value={newPlayer.position}
-                onChange={(e) => setNewPlayer({...newPlayer, position: e.target.value})}
+                onChange={(e) => setNewPlayer({ name: e.target.value })}
               />
             </div>
             <Button onClick={addNewPlayer} className="bg-green-600 hover:bg-green-700">

@@ -79,8 +79,7 @@ const TopScorers = ({ players }: TopScorersProps) => {
                       <h3 className="text-2xl font-bold text-gray-900">
                         {player.name}
                       </h3>
-                      <p className="text-gray-600 text-lg">{player.position}</p>
-                      
+                      {/* Suppression du poste */}
                       <div className="flex gap-2 mt-2">
                         {position === 1 && (
                           <Badge className="bg-yellow-500 text-white">

@@ -52,7 +52,7 @@ const PlayersList = ({ players, matches }: PlayersListProps) => {
                         <Trophy className="inline h-4 w-4 ml-2 text-yellow-500" />
                       )}
                     </h3>
-                    <p className="text-gray-600">{player.position}</p>
+                    {/* Suppression du poste du joueur */}
                   </div>
                 </div>
                 

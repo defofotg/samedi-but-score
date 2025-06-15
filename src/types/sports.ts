@@ -2,7 +2,6 @@
 export interface Player {
   id: string;
   name: string;
-  position: string;
   totalGoals: number;
   matchesPlayed: number;
   createdAt: Date;
