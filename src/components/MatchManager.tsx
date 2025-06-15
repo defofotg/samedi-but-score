@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Plus, Users, Target } from 'lucide-react';
 import { Match, Player, GoalEntry } from '@/types/sports';
 import { toast } from 'sonner';
+import MatchCardTitle from './MatchCardTitle';
 
 interface MatchManagerProps {
   matches: Match[];
@@ -222,41 +223,20 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
       <div className="grid gap-6">
         {matches.map(match => (
           <Card key={match.id} className="overflow-hidden">
-            <CardHeader className={`${match.isCompleted ? 'bg-gray-50' : 'bg-green-50'}`}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    {match.teamA} <span className="mx-1 text-gray-500">vs</span> {match.teamB}
-                    {match.isCompleted && <Badge className="bg-green-600">Terminé</Badge>}
-                  </CardTitle>
-                  <p className="text-sm text-gray-600">
-                    {dateArrayToString(match.date)}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {/* Suppression du bouton de composition */}
-                  {!match.isCompleted && (
-                    <Button
-                      onClick={() => completeMatch(match.id)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Terminer
-                    </Button>
-                  )}
-                </div>
-              </div>
+            {/* Suppression du CardHeader avec le titre, on laisse le fond si besoin*/}
+            <CardHeader className={`${match.isCompleted ? 'bg-gray-50' : 'bg-green-50'} pb-0`}>
+              {/* rien ici, tout est dans CardContent pour le titre centré */}
             </CardHeader>
-            <CardContent className="p-6">
-              {/* Scores */}
-              <div className="mb-2 flex gap-2 items-center font-semibold text-lg">
-                {match.teamA}: <span className="text-green-600">{match.score.goalsTeamA}</span>
-                <span className="px-3">-</span>
-                {match.teamB}: <span className="text-green-600">{match.score.goalsTeamB}</span>
-              </div>
+            <CardContent className="p-6 pt-4">
+              <MatchCardTitle
+                teamA={match.teamA}
+                teamB={match.teamB}
+                scoreA={match.score.goalsTeamA}
+                scoreB={match.score.goalsTeamB}
+                isCompleted={match.isCompleted}
+              />
 
-              {/* Goals – buteurs alignés de chaque côté */}
+              {/* Buteurs */}
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
                   <Target className="h-4 w-4" />
