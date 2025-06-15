@@ -10,6 +10,8 @@ import { Match, Player, GoalEntry } from '@/types/sports';
 import { toast } from 'sonner';
 import MatchCardTitle from './MatchCardTitle';
 import GoalEntryList from './GoalEntryList';
+import AddPlayerForm from "./AddPlayerForm";
+import AddGoalForm from "./AddGoalForm";
 
 interface MatchManagerProps {
   matches: Match[];
@@ -90,38 +92,37 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     toast.success('Joueur ajouté avec succès');
   };
 
-  // Ajout d'un but
-  const addGoal = (matchId: string) => {
-    if (!goalData.playerId || !goalData.team) {
-      toast.error('Veuillez sélectionner un joueur et une équipe');
-      return;
-    }
-    const match = matches.find(m => m.id === matchId);
+  // Ajout d'un but - nouvelle fonction adaptée pour le composant
+  const addGoalToMatch = (
+    matchId: string,
+    playerId: string,
+    team: string,
+    nbGoals: number
+  ) => {
+    const match = matches.find((m) => m.id === matchId);
     if (!match) return;
-    const player = players.find(p => p.id === goalData.playerId);
+    const player = players.find((p) => p.id === playerId);
     if (!player) return;
 
     // Ajout dans la structure goals
-    const goalEntry: GoalEntry = {
+    const goalEntry = {
       playerId: player.id,
       playerName: player.name,
-      team: goalData.team,
-      nbGoals: Number(goalData.nbGoals),
+      team: team,
+      nbGoals: Number(nbGoals),
     };
 
-    // Ajouter le but dans l'équipe correspondante
     const updatedGoals = { ...match.goals };
-    if (!updatedGoals[goalData.team]) updatedGoals[goalData.team] = [];
-    // Cherche s'il existe déjà une entrée pour ce joueur
-    const existing = updatedGoals[goalData.team].find(entry => entry.playerId === player.id);
+    if (!updatedGoals[team]) updatedGoals[team] = [];
+    const existing = updatedGoals[team].find((entry) => entry.playerId === player.id);
     if (existing) {
       existing.nbGoals += goalEntry.nbGoals;
     } else {
-      updatedGoals[goalData.team] = [...updatedGoals[goalData.team], goalEntry];
+      updatedGoals[team] = [...updatedGoals[team], goalEntry];
     }
 
-    // Met à jour le score
-    const isTeamA = match.teamA === goalData.team;
+    // Mise à jour du score
+    const isTeamA = match.teamA === team;
     const score = {
       goalsTeamA: isTeamA
         ? match.score.goalsTeamA + goalEntry.nbGoals
@@ -131,11 +132,10 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
         : match.score.goalsTeamB,
     };
 
-    const updatedMatches = matches.map(m =>
+    const updatedMatches = matches.map((m) =>
       m.id === matchId ? { ...m, goals: updatedGoals, score } : m
     );
     setMatches(updatedMatches);
-    setGoalData({ matchId: '', team: '', playerId: '', nbGoals: 1 });
     toast.success(`But ajouté à ${player.name} (${goalEntry.nbGoals})`);
   };
 
@@ -244,42 +244,14 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
         </Dialog>
       </div>
 
-      {/* Add Player Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Ajouter un joueur
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label>Nom du joueur</Label>
-              <Input
-                placeholder="Nom du joueur"
-                value={newPlayer.name}
-                onChange={e => setNewPlayer({ name: e.target.value })}
-              />
-            </div>
-            <Button
-              onClick={addNewPlayer}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Ajouter
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Add Player Section (refactored) */}
+      <AddPlayerForm players={players} setPlayers={setPlayers} />
 
       {/* Matches List */}
       <div className="grid gap-6">
-        {matches.map(match => (
+        {matches.map((match) => (
           <Card key={match.id} className="overflow-hidden">
-            {/* Suppression du CardHeader avec le titre, on laisse le fond si besoin*/}
-            <CardHeader className={`${match.isCompleted ? 'bg-gray-50' : 'bg-green-50'} pb-0`}>
-              {/* rien ici, tout est dans CardContent pour le titre centré */}
-            </CardHeader>
+            <CardHeader className={`${match.isCompleted ? 'bg-gray-50' : 'bg-green-50'} pb-0`} />
             <CardContent className="p-6 pt-4">
               <MatchCardTitle
                 teamA={match.teamA}
@@ -296,7 +268,6 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                   Buteurs
                 </h4>
                 <div className="flex flex-row gap-6">
-                  {/* Buteurs équipe de gauche */}
                   <GoalEntryList
                     entries={match.goals[match.teamA] || []}
                     team={match.teamA}
@@ -305,7 +276,6 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                     align="left"
                     disabled={match.isCompleted}
                   />
-                  {/* Buteurs équipe de droite */}
                   <GoalEntryList
                     entries={match.goals[match.teamB] || []}
                     team={match.teamB}
@@ -321,56 +291,15 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 </div>
               </div>
 
-              {/* Add Goal */}
+              {/* Add Goal (refactored) */}
               {!match.isCompleted && (
-                <div className="flex gap-4 items-end">
-                  <div className="flex-1">
-                    <Label>Buteur</Label>
-                    <select
-                      className="w-full p-2 border rounded"
-                      value={goalData.playerId}
-                      onChange={e => setGoalData({ ...goalData, playerId: e.target.value })}
-                    >
-                      <option value="">Sélectionner un joueur</option>
-                      {players.map(player => (
-                        <option key={player.id} value={player.id}>
-                          {player.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex-1">
-                    <Label>Équipe</Label>
-                    <select
-                      className="w-full p-2 border rounded"
-                      value={goalData.team}
-                      onChange={e => setGoalData({ ...goalData, team: e.target.value })}
-                    >
-                      <option value="">Sélectionner une équipe</option>
-                      <option value={match.teamA}>{match.teamA}</option>
-                      <option value={match.teamB}>{match.teamB}</option>
-                    </select>
-                  </div>
-                  <div className="flex-1">
-                    <Label>Nb buts</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={goalData.nbGoals}
-                      onChange={e =>
-                        setGoalData({ ...goalData, nbGoals: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <Button
-                    onClick={() => addGoal(match.id)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Target className="h-4 w-4 mr-1" />
-                    Ajouter but
-                  </Button>
-                </div>
+                <AddGoalForm
+                  matchId={match.id}
+                  matchTeamA={match.teamA}
+                  matchTeamB={match.teamB}
+                  players={players}
+                  addGoal={addGoalToMatch}
+                />
               )}
             </CardContent>
           </Card>
