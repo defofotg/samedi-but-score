@@ -9,6 +9,7 @@ import { Calendar, Plus, Users, Target } from 'lucide-react';
 import { Match, Player, GoalEntry } from '@/types/sports';
 import { toast } from 'sonner';
 import MatchCardTitle from './MatchCardTitle';
+import GoalEntryList from './GoalEntryList';
 
 interface MatchManagerProps {
   matches: Match[];
@@ -138,6 +139,58 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
     toast.success(`But ajouté à ${player.name} (${goalEntry.nbGoals})`);
   };
 
+  // Suppression d'un but pour un joueur
+  const removeGoal = ({
+    matchId,
+    team,
+    playerId,
+  }: {
+    matchId: string;
+    team: string;
+    playerId: string;
+  }) => {
+    const matchIdx = matches.findIndex((m) => m.id === matchId);
+    if (matchIdx === -1) return;
+
+    const match = matches[matchIdx];
+    const goalsList = match.goals[team];
+    if (!goalsList) return;
+
+    const entryIdx = goalsList.findIndex((e) => e.playerId === playerId);
+    if (entryIdx === -1) return;
+
+    const entry = goalsList[entryIdx];
+    if (entry.nbGoals <= 0) return; // Rien à retirer, sécurité
+
+    let newGoalsList = [...goalsList];
+    // Si le buteur n'a plus qu'un but, on le retire de la liste
+    if (entry.nbGoals === 1) {
+      newGoalsList.splice(entryIdx, 1);
+    } else {
+      newGoalsList[entryIdx] = { ...entry, nbGoals: entry.nbGoals - 1 };
+    }
+    // Met à jour la structure complète
+    const updatedGoals = { ...match.goals, [team]: newGoalsList };
+
+    // Mettre à jour le score du match
+    let newScore = { ...match.score };
+    if (team === match.teamA && match.score.goalsTeamA > 0)
+      newScore.goalsTeamA -= 1;
+    else if (team === match.teamB && match.score.goalsTeamB > 0)
+      newScore.goalsTeamB -= 1;
+
+    const updatedMatch = { ...match, goals: updatedGoals, score: newScore };
+    const updatedMatches = [...matches];
+    updatedMatches[matchIdx] = updatedMatch;
+    setMatches(updatedMatches);
+
+    // Optionnel: toast
+    const player = players.find((p) => p.id === playerId);
+    if (player) {
+      toast.success(`But retiré à ${player.name}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -236,7 +289,7 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 isCompleted={match.isCompleted}
               />
 
-              {/* Buteurs */}
+              {/* Buteurs avec suppression */}
               <div className="mb-4">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
                   <Target className="h-4 w-4" />
@@ -244,41 +297,23 @@ const MatchManager = ({ matches, setMatches, players, setPlayers }: MatchManager
                 </h4>
                 <div className="flex flex-row gap-6">
                   {/* Buteurs équipe de gauche */}
-                  <div className="flex-1 flex flex-col items-start gap-2">
-                    {(match.goals[match.teamA]?.length > 0) ? (
-                      match.goals[match.teamA].map((entry, idx) => (
-                        <div
-                          key={entry.playerId + idx}
-                          className="p-2 rounded bg-green-50 w-fit text-left"
-                        >
-                          <span>{entry.playerName}</span>
-                          <span className="ml-1 text-gray-600">
-                            ({entry.nbGoals} but{entry.nbGoals > 1 ? 's' : ''})
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <span className="text-gray-400 italic">—</span>
-                    )}
-                  </div>
+                  <GoalEntryList
+                    entries={match.goals[match.teamA] || []}
+                    team={match.teamA}
+                    matchId={match.id}
+                    onRemoveGoal={removeGoal}
+                    align="left"
+                    disabled={match.isCompleted}
+                  />
                   {/* Buteurs équipe de droite */}
-                  <div className="flex-1 flex flex-col items-end gap-2">
-                    {(match.goals[match.teamB]?.length > 0) ? (
-                      match.goals[match.teamB].map((entry, idx) => (
-                        <div
-                          key={entry.playerId + idx}
-                          className="p-2 rounded bg-green-50 w-fit text-right"
-                        >
-                          <span>{entry.playerName}</span>
-                          <span className="ml-1 text-gray-600">
-                            ({entry.nbGoals} but{entry.nbGoals > 1 ? 's' : ''})
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <span className="text-gray-400 italic">—</span>
-                    )}
-                  </div>
+                  <GoalEntryList
+                    entries={match.goals[match.teamB] || []}
+                    team={match.teamB}
+                    matchId={match.id}
+                    onRemoveGoal={removeGoal}
+                    align="right"
+                    disabled={match.isCompleted}
+                  />
                 </div>
                 <div className="flex flex-row justify-between px-1 mt-1 text-xs text-gray-400">
                   <span>{match.teamA}</span>
