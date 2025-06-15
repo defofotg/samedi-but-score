@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Target, Trophy } from 'lucide-react';
+import { Users, Trophy } from 'lucide-react';
 import { Player, Match } from '@/types/sports';
 
 interface PlayersListProps {
@@ -11,20 +11,40 @@ interface PlayersListProps {
 }
 
 const PlayersList = ({ players, matches }: PlayersListProps) => {
-  // Calculate matches played for each player
+  // Calcul des stats pour chaque joueur : buts/matches
   const playersWithStats = players.map(player => {
-    const matchesPlayed = matches.filter(match => 
-      match.lineup.includes(player.id) && match.completed
-    ).length;
-    
+    let totalGoals = 0;
+    let matchesPlayed = 0;
+
+    matches.forEach(match => {
+      // Vérifie chaque équipe dans goals
+      Object.values(match.goals || {}).forEach(goalsArr => {
+        goalsArr.forEach(goal => {
+          if (goal.playerId === player.id) {
+            totalGoals += goal.nbGoals;
+          }
+        });
+      });
+      // Consider match played if player has scored in it or if we had a more precise participant list
+      // Pour l’instant, on compte chaque match où il a marqué comme "joué"
+      if (
+        Object.values(match.goals || {}).some(goalsArr =>
+          goalsArr.some(goal => goal.playerId === player.id)
+        )
+      ) {
+        matchesPlayed += 1;
+      }
+    });
+
     return {
       ...player,
+      totalGoals,
       matchesPlayed,
-      avgGoals: matchesPlayed > 0 ? (player.totalGoals / matchesPlayed).toFixed(2) : '0.00'
+      avgGoals: matchesPlayed > 0 ? (totalGoals / matchesPlayed).toFixed(2) : '0.00',
     };
   });
 
-  // Sort players by total goals
+  // Tri par buts
   const sortedPlayers = playersWithStats.sort((a, b) => b.totalGoals - a.totalGoals);
 
   return (
@@ -52,7 +72,6 @@ const PlayersList = ({ players, matches }: PlayersListProps) => {
                         <Trophy className="inline h-4 w-4 ml-2 text-yellow-500" />
                       )}
                     </h3>
-                    {/* Suppression du poste du joueur */}
                   </div>
                 </div>
                 

@@ -9,9 +9,40 @@ interface TopScorersProps {
   players: Player[];
 }
 
-const TopScorers = ({ players }: TopScorersProps) => {
-  // Get top 5 scorers
-  const topScorers = players
+// Calcule les buts/matchs pour chaque joueur à partir des matches (nouvelle structure!)
+const getPlayerStats = (players: Player[], matches: Match[]) => {
+  return players.map(player => {
+    let totalGoals = 0;
+    let matchesPlayed = 0;
+    matches.forEach(match => {
+      Object.values(match.goals || {}).forEach(goalsArr => {
+        goalsArr.forEach(entry => {
+          if (entry.playerId === player.id) {
+            totalGoals += entry.nbGoals;
+          }
+        });
+      });
+      // On compte le match comme joué si joueur a marqué dans le match
+      if (
+        Object.values(match.goals || {}).some(goalsArr =>
+          goalsArr.some(goal => goal.playerId === player.id)
+        )
+      ) {
+        matchesPlayed += 1;
+      }
+    });
+    return {
+      ...player,
+      totalGoals,
+      matchesPlayed,
+    };
+  });
+};
+
+const TopScorers = ({ players, matches }: TopScorersProps) => {
+  const playerStats = getPlayerStats(players, matches);
+  // Top 5 des buteurs
+  const topScorers = playerStats
     .filter(player => player.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals)
     .slice(0, 5);
@@ -79,7 +110,6 @@ const TopScorers = ({ players }: TopScorersProps) => {
                       <h3 className="text-2xl font-bold text-gray-900">
                         {player.name}
                       </h3>
-                      {/* Suppression du poste */}
                       <div className="flex gap-2 mt-2">
                         {position === 1 && (
                           <Badge className="bg-yellow-500 text-white">
@@ -117,7 +147,7 @@ const TopScorers = ({ players }: TopScorersProps) => {
                   </div>
                 </div>
                 
-                {/* Progress bar showing goals relative to top scorer */}
+                {/* Barre de progression */}
                 {topScorers[0] && (
                   <div className="mt-4">
                     <div className="w-full bg-gray-200 rounded-full h-2">

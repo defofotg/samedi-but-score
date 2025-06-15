@@ -16,13 +16,8 @@ const Index = () => {
   useEffect(() => {
     const savedMatches = localStorage.getItem('matches');
     const savedPlayers = localStorage.getItem('players');
-    
-    if (savedMatches) {
-      setMatches(JSON.parse(savedMatches));
-    }
-    if (savedPlayers) {
-      setPlayers(JSON.parse(savedPlayers));
-    }
+    if (savedMatches) setMatches(JSON.parse(savedMatches));
+    if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
   }, []);
 
   useEffect(() => {
@@ -33,10 +28,19 @@ const Index = () => {
     localStorage.setItem('players', JSON.stringify(players));
   }, [players]);
 
+  // Nouveau calcul
   const totalMatches = matches.length;
-  const totalGoals = matches.reduce((acc, match) => acc + match.goals.length, 0);
+  const totalGoals = matches.reduce((acc, m) => {
+    if (!m.goals) return acc;
+    return (
+      acc +
+      Object.values(m.goals)
+        .flat()
+        .reduce((sum, entry) => sum + (entry?.nbGoals || 0), 0)
+    );
+  }, 0);
   const totalPlayers = players.length;
-  const nextMatch = matches.find(match => !match.completed);
+  const nextMatch = matches.find(match => !match.isCompleted);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
@@ -143,7 +147,7 @@ const Index = () => {
 
           <TabsContent value="players">
             <PlayersList 
-              players={players} 
+              players={players}
               setPlayers={setPlayers}
               matches={matches}
             />
